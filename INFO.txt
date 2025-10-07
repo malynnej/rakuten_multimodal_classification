@@ -1,0 +1,16 @@
+Run the following commands in cmd prompt to create a python environment:
+
+1.Create Python Environment
+- conda create -p venv python==3.12 -y
+
+2. Activate Environment
+- conda activate venv/
+
+3. Install all packages.
+- pip install -r requirements.txt
+
+Note: Make sure to select the venv kernel.
+
+4. Create .gitignore file
+- .gitignore
+- Insert foldername: venv/
