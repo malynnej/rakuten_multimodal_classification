@@ -1,0 +1,11 @@
+TextOutlier:
+  llm: "en_core_web_sm"
+  sentence_normalization: True
+  similarity_threshold: 0.8
+  factor: 2
+
+ImageCleaning:
+  stats_calc: False
+
+
+  

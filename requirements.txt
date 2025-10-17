@@ -10,3 +10,7 @@ tensorflow
 keras
 joblib
 ipykernel
+opencv-python
+scikit-image
+pyYAML
+python-box
