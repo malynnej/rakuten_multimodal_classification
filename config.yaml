@@ -2,6 +2,10 @@ Paths:
   data_raw_dir: "./data/raw/"
   image_raw_dir: "./data/raw/images/"
   image_train_path: "./data/raw/images/image_train/"
+  #add JLA
+  image_train_path_output: "./data/raw/images/image_train_preprocessed/"
+  image_train_path_greyscale: "./data/raw/images/image_train_greyscale/"
+  #end add JLA
   X_train: "./data/raw/X_train.csv"
   y_train: "./data/raw/y_train.csv"
   TextOutlierReport: "./TextOutlierReport.txt"
