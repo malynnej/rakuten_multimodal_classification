@@ -24,6 +24,8 @@ import numpy as np
 from data_preprocessing.initialize_data import initialization
 from data_preprocessing.text_outliers import TransformTextOutliers
 from data_preprocessing.image_cleaning import ImageCleaning
+from data_preprocessing.class_balancing import ClassBalancing # see 1.4 Balancing Textual Data @Johann
+
 
 # Loading Data Frame
 init = initialization()
@@ -44,6 +46,9 @@ tto = TransformTextOutliers(model=params.TextOutlier.llm,
 df, _, _ = tto.transform_outliers(df)
 
 # 1.4 Balancing Textual Data @Johann
+cb = ClassBalancing(method=params.ClassBalancing.method)
+df = cb.process(df)
+
 
 # 2. Image Data Preprocessing
 # 2.1 Clean Image Data @Michael

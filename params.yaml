@@ -7,5 +7,11 @@ TextOutlier:
 ImageCleaning:
   stats_calc: False
 
-
+ClassBalancing: # see main_pipeline.py 1.4. Balance Textual Data @Johann
+  method: "none"
+  # Options: 'none', 'undersample', 'oversample', 'smote'
+  # 'none' = no balancing (default)
+  # 'undersample' = reduce majority class
+  # 'oversample' = duplicate minority class
+  # 'smote' = create synthetic minority samples
   

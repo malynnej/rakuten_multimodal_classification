@@ -14,3 +14,5 @@ opencv-python
 scikit-image
 pyYAML
 python-box
+imbalanced-learn # see main_pipeine.py 1.4 Balancing Textual Data @Johann
+
