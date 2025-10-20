@@ -22,6 +22,12 @@ class initialization:
 
         df = X_train.join(y_train)
 
+        #add JLA
+        df["image_path"] = paths.Paths.image_train_path + "image_" + df["imageid"].astype(str) + "_product_" + df["productid"].astype(str) + ".jpg"
+        df["image_path_preprocessed"] = paths.Paths.image_train_path_output + df["prdtypecode"].astype(str) + "/" + "image_" + df["imageid"].astype(str) + "_product_" + df["productid"].astype(str) + ".jpg"
+        df["image_path_greyscale"] = paths.Paths.image_train_path_greyscale + df["prdtypecode"].astype(str) + "/" + "image_" + df["imageid"].astype(str) + "_product_" + df["productid"].astype(str) + ".jpg"
+        #end add JLA
+
         df["text"] = df["designation"] + " " + df["description"]
         df["text"] = df["text"].fillna(df["designation"])
 
