@@ -25,6 +25,10 @@ import numpy as np
 from data_preprocessing.initialize_data import initialization
 from data_preprocessing.text_outliers import TransformTextOutliers
 from data_preprocessing.image_cleaning import ImageCleaning
+<<<<<<< HEAD
+from data_preprocessing.class_balancing import ClassBalancing # see 1.4 Balancing Textual Data @Johann
+
+=======
 from data_preprocessing.image_preprocessing import ImagePreprocessor, BackgroundDetector, ImageCropper
 
 #Import for image augmentation and model training
@@ -32,6 +36,7 @@ import tensorflow as tf
 from tensorflow.keras import layers, Model
 from tensorflow.keras.preprocessing import image
 tf.config.list_physical_devices('GPU')
+>>>>>>> main
 
 # Loading Data Frame
 init = initialization()
@@ -52,6 +57,9 @@ tto = TransformTextOutliers(model=params.TextOutlier.llm,
 df, _, _ = tto.transform_outliers(df)
 
 # 1.4 Balancing Textual Data @Johann
+cb = ClassBalancing(method=params.ClassBalancing.method)
+df = cb.process(df)
+
 
 # 2. Image Data Preprocessing
 # 2.1 Clean Image Data @Michael

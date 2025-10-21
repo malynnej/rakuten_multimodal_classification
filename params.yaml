@@ -7,6 +7,16 @@ TextOutlier:
 ImageCleaning:
   stats_calc: False
 
+<<<<<<< HEAD
+ClassBalancing: # see main_pipeline.py 1.4. Balance Textual Data @Johann
+  method: "none"
+  # Options: 'none', 'undersample', 'oversample', 'smote'
+  # 'none' = no balancing (default)
+  # 'undersample' = reduce majority class
+  # 'oversample' = duplicate minority class
+  # 'smote' = create synthetic minority samples
+  
+=======
 BackgroundDetector:
   white_threshold: 220
   border_ratio: 0.20
@@ -20,3 +30,4 @@ ImageCropper:
 ImagePreprocessor:
   background_detector: detector
   image_cropper: cropper
+>>>>>>> main
