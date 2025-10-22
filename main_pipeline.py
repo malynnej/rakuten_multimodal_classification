@@ -96,6 +96,9 @@ preprocessor.preprocess_from_dataframe(
     category_col='prdtypecode'
 )
 
+#Optional: display some before/after images
+#preprocessor.display_input_vs_output(df=df, category=None, samples_per_category=5, random_state=42)
+
 # 3.0 Image Augmentation & Modeling @Jenny
 
 #Custom CNN model training with tf.data pipeline with Keras
