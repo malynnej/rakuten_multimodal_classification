@@ -355,3 +355,83 @@ class ImagePreprocessor:
         print(f"Colored background: {self.stats['colored_bg_count']}")
         print(f"Failed: {self.stats['failed']}")
         print("="*50)
+
+    # Helper: display input, greyscale, and preprocessed images side-by-side
+    def display_input_vs_output(self, df: pd.DataFrame,
+                                category: Optional[str] = None,
+                                samples_per_category: int = 5,
+                                random_state: Optional[int] = None):
+        """
+        Displays input, greyscale, and preprocessed images side by side.
+
+        Args:
+            df: DataFrame containing at least 'image_path', 'image_path_preprocessed', 'image_path_greyscale', and 'prdtypecode'.
+            category: If provided, only show this prdtypecode. Otherwise iterate over all unique categories.
+            samples_per_category: Number of image pairs to show per category.
+            random_state: Optional seed for reproducibility.
+        """
+        from pathlib import Path
+        rng = np.random.default_rng(random_state)
+
+        # Determine categories to show
+        if category is not None:
+            categories = [category]
+        else:
+            categories = df['prdtypecode'].unique()
+
+        for prdtypecode in categories:
+            group = df.loc[df['prdtypecode'] == prdtypecode].reset_index(drop=True)
+            if len(group) == 0:
+                print(f"No images for category {prdtypecode}, skipping.")
+                continue
+
+            n = min(samples_per_category, len(group))
+            indices = rng.choice(len(group), size=n, replace=False)
+
+            fig, axes = plt.subplots(nrows=n, ncols=3, figsize=(15, 4 * n))
+            # Normalize axes shape when n == 1
+            if n == 1:
+                axes = np.array([axes])
+
+            for i, idx in enumerate(indices):
+                in_path = str(group.loc[idx, 'image_path'])
+                out_path = str(group.loc[idx, 'image_path_preprocessed'])
+                grey_path = str(group.loc[idx, 'image_path_greyscale'])
+
+                # Input image
+                try:
+                    img_in = imread(in_path)
+                    axes[i, 0].imshow(img_in)
+                    axes[i, 0].set_title(f"Input: {Path(in_path).name}")
+                except Exception:
+                    axes[i, 0].text(0.5, 0.5, "Could not load\n(Input)", ha='center')
+                    axes[i, 0].set_title("Input: missing")
+                axes[i, 0].axis('off')
+
+                # Greyscale Output image
+                try:
+                    img_grey = imread(grey_path)
+                    axes[i, 1].imshow(img_grey, cmap='gray')
+                    axes[i, 1].set_title(f"Greyscale: {Path(grey_path).name}")
+                except Exception:
+                    axes[i, 1].text(0.5, 0.5, "Could not load\n(Greyscale)", ha='center')
+                    axes[i, 1].set_title("Greyscale: missing")
+                axes[i, 1].axis('off')
+
+                # Preprocessed Output image
+                try:
+                    img_out = imread(out_path)
+                    axes[i, 2].imshow(img_out)
+                    axes[i, 2].set_title(f"Preprocessed: {Path(out_path).name}")
+                except Exception:
+                    axes[i, 2].text(0.5, 0.5, "Could not load\n(Preprocessed)", ha='center')
+                    axes[i, 2].set_title("Preprocessed: missing")
+                axes[i, 2].axis('off')
+
+            plt.suptitle(f"Input vs Greyscale vs Preprocessed - Category: {prdtypecode}", fontsize=16)
+            plt.tight_layout(rect=[0, 0.03, 1, 0.95])
+            plt.show()
+
+        print("Done displaying pairs.")
+
+    

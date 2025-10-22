@@ -25,10 +25,7 @@ import numpy as np
 from data_preprocessing.initialize_data import initialization
 from data_preprocessing.text_outliers import TransformTextOutliers
 from data_preprocessing.image_cleaning import ImageCleaning
-<<<<<<< HEAD
 from data_preprocessing.class_balancing import ClassBalancing # see 1.4 Balancing Textual Data @Johann
-
-=======
 from data_preprocessing.image_preprocessing import ImagePreprocessor, BackgroundDetector, ImageCropper
 
 #Import for image augmentation and model training
@@ -36,7 +33,6 @@ import tensorflow as tf
 from tensorflow.keras import layers, Model
 from tensorflow.keras.preprocessing import image
 tf.config.list_physical_devices('GPU')
->>>>>>> main
 
 # Loading Data Frame
 init = initialization()
@@ -95,6 +91,7 @@ preprocessor.preprocess_from_dataframe(
     image_path_col='image_path',
     category_col='prdtypecode'
 )
+
 
 # 3.0 Image Augmentation & Modeling @Jenny
 
