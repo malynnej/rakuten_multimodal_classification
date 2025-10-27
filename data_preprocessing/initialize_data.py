@@ -28,12 +28,22 @@ class initialization:
         df["image_path_greyscale"] = paths.Paths.image_train_path_greyscale + df["prdtypecode"].astype(str) + "/" + "image_" + df["imageid"].astype(str) + "_product_" + df["productid"].astype(str) + ".jpg"
         #end add JLA
 
-        df["text"] = df["designation"] + " " + df["description"]
-        df["text"] = df["text"].fillna(df["designation"])
+        # Combine description and designation column
+        # combined text column names - Desig_Descrip
+        # Avoiding repeating text occurs in both col
+        # After combinining not dropping desig and description just for LLM
 
-        df = df.drop(columns=["designation", "description"])
+        df["description"] = df["description"].fillna(" ")
+        indices_eq = df.index[df["description"] == df["designation"]]
+        df.loc[indices_eq, "description"] = " "
 
-        print("Data loaded successfully.")
+        for i in df.index:
+            if i not in indices_eq:
+                df.at[i, "Desig_Descrip"] = df.at[i, 'designation'] + "; "+ df.at[i, 'description']
+            else: 
+                df.at[i, "Desig_Descrip"] = df.at[i, 'description']
+
+        print("Data loaded successfully...")
 
         return df
     

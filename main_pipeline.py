@@ -23,6 +23,8 @@ import numpy as np
 
 # Import custom classes for data preprocessing
 from data_preprocessing.initialize_data import initialization
+from data_preprocessing.text_cleaning import TextCleaning
+from data_preprocessing.text_translation import LLMTransformation
 from data_preprocessing.text_outliers import TransformTextOutliers
 from data_preprocessing.image_cleaning import ImageCleaning
 from data_preprocessing.class_balancing import ClassBalancing # see 1.4 Balancing Textual Data @Johann
@@ -41,84 +43,99 @@ df, paths, params = init.initialize()
 
 # 1. Textual Data Preprocessing
 # 1.1 Text Cleaning @Rohan
+
+clt = TextCleaning(html_to_text = params.DecodeEncode.html_to_text,
+                   words_encoding = params.DecodeEncode.words_encoding)
+
+df,_, = clt.cleanTxt(df,["Desig_Descrip"])
  
 # 1.2 Text Translation @Rohan
 
+# Instantiate the translation class
+
+ttr = LLMTransformation(TranslatorKind=params.transPara.TranslatorKind, 
+                      llm_model=params.transPara.llm_model)
+
+# Short DataFrame for testing, taking long computation time
+# for big dataframe. Batch needs to be implemented. 
+df_new = df.head(10) 
+df_new = ttr.TxtTranslate(df_new,["Desig_Descrip"])
+
 # 1.3 Text outliers @Michael
 tto = TransformTextOutliers(model=params.TextOutlier.llm,
-                            sentence_normalization=params.TextOutlier.sentence_normalization,
-                            similarity_threshold=params.TextOutlier.similarity_threshold, 
-                            factor=params.TextOutlier.factor)
+                             sentence_normalization=params.TextOutlier.sentence_normalization,
+                             similarity_threshold=params.TextOutlier.similarity_threshold, 
+                             factor=params.TextOutlier.factor)
 
 df, _, _ = tto.transform_outliers(df)
 
-# 1.4 Balancing Textual Data @Johann
+# # 1.4 Balancing Textual Data @Johann
 cb = ClassBalancing(method=params.ClassBalancing.method)
 df = cb.process(df)
 
 
-# 2. Image Data Preprocessing
-# 2.1 Clean Image Data @Michael
+ # 2. Image Data Preprocessing
+ # 2.1 Clean Image Data @Michael
 IC = ImageCleaning(stats_calc=params.ImageCleaning.stats_calc,
-                   image_train_path=paths.Paths.image_train_path,
-                    df_save_path=paths.Paths.ImageDataFrameSavePath)
+                    image_train_path=paths.Paths.image_train_path,
+                     df_save_path=paths.Paths.ImageDataFrameSavePath)
 IC.image_stats_calc(df)
 
 
-# 2.2 Image Preprocessing (Background Handling) @Jenny
+ # 2.2 Image Preprocessing (Background Handling) @Jenny
 
 print("Start image preprocessing...")
 
-# Initialize components
+ # Initialize components
 detector = BackgroundDetector(
-    white_threshold= params.BackgroundDetector.white_threshold,
-    border_ratio=params.BackgroundDetector.border_ratio,
-    white_percentage_threshold=params.BackgroundDetector.white_percentage_threshold,
-)
+     white_threshold= params.BackgroundDetector.white_threshold,
+     border_ratio=params.BackgroundDetector.border_ratio,
+     white_percentage_threshold=params.BackgroundDetector.white_percentage_threshold,
+ )
 
 cropper = ImageCropper(padding=params.ImageCropper.padding, min_crop_ratio=params.ImageCropper.min_crop_ratio, min_aspect_ratio=params.ImageCropper.min_aspect_ratio)
 
 preprocessor = ImagePreprocessor(
-    background_detector=detector,
-    image_cropper=cropper
-)
+     background_detector=detector,
+     image_cropper=cropper
+ )
 
-# Process dataset: images are in a flat folder; derive categories from dataframe 'prdtypecode'
+ # Process dataset: images are in a flat folder; derive categories from dataframe 'prdtypecode'
 preprocessor.preprocess_from_dataframe(
-    df=df,
-    output_dir=paths.Paths.image_train_path_output,
-    output_dir_greyscale=paths.Paths.image_train_path_greyscale,
-    image_path_col='image_path',
-    category_col='prdtypecode'
-)
+     df=df,
+     output_dir=paths.Paths.image_train_path_output,
+     output_dir_greyscale=paths.Paths.image_train_path_greyscale,
+     image_path_col='image_path',
+     category_col='prdtypecode'
+ )
 
 
-# 3.0 Image Augmentation & Modeling @Jenny
+# # 3.0 Image Augmentation & Modeling @Jenny
 
-#Custom CNN model training with tf.data pipeline with Keras
-#Framework: TensorFlow 2.x with Keras
-#Using tf.data for efficient data loading and preprocessing augmentation
-#Using Keras preprocessing layers for data augmentation
-#Using a simple CNN architecture for demonstration
-#Using categorical crossentropy loss for multi-class classification
-# print("\nTrain model...")
+# #Custom CNN model training with tf.data pipeline with Keras
+# #Framework: TensorFlow 2.x with Keras
+# #Using tf.data for efficient data loading and preprocessing augmentation
+# #Using Keras preprocessing layers for data augmentation
+# #Using a simple CNN architecture for demonstration
+# #Using categorical crossentropy loss for multi-class classification
+ # print("\nTrain model...")
 AUTOTUNE = tf.data.AUTOTUNE
 
-# Create tf.data datasets from directory and create training and validation splits
+ # Create tf.data datasets from directory and create training and validation splits
 train_ds = tf.keras.utils.image_dataset_from_directory(
-    paths.Paths.image_train_path_output,
-    labels='inferred',
-    label_mode='categorical',
-    image_size = (224, 224),  
-    batch_size= 64,
-    validation_split=0.2,
-    subset='training',
-    seed=42,
-    shuffle=True
-)
+     paths.Paths.image_train_path_output,
+     labels='inferred',
+     label_mode='categorical',
+     image_size = (224, 224),  
+     batch_size= 64,
+     validation_split=0.2,
+     subset='training',
+     seed=42,
+     shuffle=True
+ )
 
-# Activate Limit to ~2000 samples (32 batches of 64)
-#train_ds = train_ds.take(32)
+ # Activate Limit to ~2000 samples (32 batches of 64)
+ #train_ds = train_ds.take(32)
 
 val_ds = tf.keras.utils.image_dataset_from_directory(
     paths.Paths.image_train_path_output,

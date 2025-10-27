@@ -6,9 +6,7 @@ Paths:
   image_train_path_output: "./data/raw/images/image_train_preprocessed/"
   image_train_path_greyscale: "./data/raw/images/image_train_greyscale/"
   #end add JLA
-  X_train: "./data/raw/X_train.csv"
-  y_train: "./data/raw/y_train.csv"
+  X_train: "./Raw_Data/X_train.csv"
+  y_train: "./Raw_Data/y_train.csv"
   TextOutlierReport: "./TextOutlierReport.txt"
   ImageDataFrameSavePath: "./data/tmp/"
-
-
