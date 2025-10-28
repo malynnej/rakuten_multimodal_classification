@@ -23,4 +23,17 @@ ClassBalancing: # see main_pipeline.py 1.4. Balance Textual Data @Johann
   # 'undersample' = reduce majority class
   # 'oversample' = duplicate minority class
   # 'smote' = create synthetic minority samples
-  
+
+BackgroundDetector:
+  white_threshold: 220
+  border_ratio: 0.20
+  white_percentage_threshold: 0.6
+
+ImageCropper:
+  padding: 10
+  min_crop_ratio: 0.4
+  min_aspect_ratio: 0.5
+
+ImagePreprocessor:
+  background_detector: detector
+  image_cropper: cropper
