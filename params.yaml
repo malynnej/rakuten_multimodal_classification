@@ -1,3 +1,12 @@
+
+DecodeEncode:
+  html_to_text : True
+  words_encoding : True
+
+transPara:
+  TranslatorKind : 'LLM'
+  llm_model : "llama3.2:3b"
+
 TextOutlier:
   llm: "en_core_web_sm"
   sentence_normalization: True
@@ -7,7 +16,6 @@ TextOutlier:
 ImageCleaning:
   stats_calc: False
 
-<<<<<<< HEAD
 ClassBalancing: # see main_pipeline.py 1.4. Balance Textual Data @Johann
   method: "none"
   # Options: 'none', 'undersample', 'oversample', 'smote'
@@ -15,8 +23,7 @@ ClassBalancing: # see main_pipeline.py 1.4. Balance Textual Data @Johann
   # 'undersample' = reduce majority class
   # 'oversample' = duplicate minority class
   # 'smote' = create synthetic minority samples
-  
-=======
+
 BackgroundDetector:
   white_threshold: 220
   border_ratio: 0.20
@@ -30,4 +37,3 @@ ImageCropper:
 ImagePreprocessor:
   background_detector: detector
   image_cropper: cropper
->>>>>>> main

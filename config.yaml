@@ -10,5 +10,3 @@ Paths:
   y_train: "./data/raw/y_train.csv"
   TextOutlierReport: "./TextOutlierReport.txt"
   ImageDataFrameSavePath: "./data/tmp/"
-
-
