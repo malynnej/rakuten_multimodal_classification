@@ -14,3 +14,11 @@ Note: Make sure to select the venv kernel.
 4. Create .gitignore file
 - .gitignore
 - Insert foldername: venv/
+
+5. Download SpaCy models
+- python -m spacy download "MODELNAME" (cmd)
+-> "MODELNAME": e.g. "en_core_web_sm"
+
+6. Download SpaCy models
+- nltk.download(package) (.py, .ipynb)
+-> package: e.g. "punkt"

@@ -1,23 +1,29 @@
+Data:
+  test_size: 0.2
+  random_state: 42
 
 DecodeEncode:
   html_to_text : True
   words_encoding : True
 
 transPara:
-  TranslatorKind : 'LLM'
+  TranslatorKind : 'Google'
   llm_model : "llama3.2:3b"
 
 TextOutlier:
   llm: "en_core_web_sm"
+  word_count_threshold: 200
   sentence_normalization: True
   similarity_threshold: 0.8
-  factor: 2
+  factor: 1
 
 ImageCleaning:
-  stats_calc: False
+  stats_calc: True
+  overwrite_duplicates: True
+  color_stats: False
 
 ClassBalancing: # see main_pipeline.py 1.4. Balance Textual Data @Johann
-  method: "none"
+  method: "undersample"
   # Options: 'none', 'undersample', 'oversample', 'smote'
   # 'none' = no balancing (default)
   # 'undersample' = reduce majority class
@@ -37,3 +43,13 @@ ImageCropper:
 ImagePreprocessor:
   background_detector: detector
   image_cropper: cropper
+
+ExecFlags:
+  TextCleaningFlag: True
+  TransformTextOutliersFlag: True
+  LLMTransformationFlag: True
+  ClassBalancingFlag: True
+  ImageCleaningFlag: True
+  ImagePreprocessorFlag: True
+
+

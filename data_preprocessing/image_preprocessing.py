@@ -1,6 +1,7 @@
 # General
 import numpy as np
 import pandas as pd
+import time
 
 # Visualization:
 import matplotlib.pyplot as plt
@@ -296,6 +297,9 @@ class ImagePreprocessor:
             category_col: Column name in df that contains the category code to use as folder name.
             file_extensions: Allowed file extensions (used to filter rows if needed).
         """
+        # Start execution timer
+        t_start = time.time()
+        
         output_root = Path(output_dir)
         if output_dir_greyscale:
             output_root_greyscale = Path(output_dir_greyscale)
@@ -344,6 +348,11 @@ class ImagePreprocessor:
                 self.preprocess_image_from_path(str(p), output_file)
 
         self._print_statistics()
+
+        # End execution timer
+        t_end = time.time()
+        t_exec = t_end-t_start
+        print(f"Execution time: {t_exec} seconds.")
     
     def _print_statistics(self):
         """Gives processing statistics"""

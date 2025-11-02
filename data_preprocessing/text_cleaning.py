@@ -23,6 +23,7 @@ import pandas as pd
 import numpy as np
 from tqdm import tqdm
 tqdm.pandas()
+import time
 
 # ----------------------------------
 # 🧹 Text Processing & NLP
@@ -78,6 +79,9 @@ class TextCleaning:
 
         """
 
+        # Start execution timer
+        t_start = time.time()
+
         df = df.copy()
 
         if self.html_to_text:
@@ -85,6 +89,11 @@ class TextCleaning:
 
         if self.words_encoding:
             df = self._fix_encoding(df,columns)
+
+        # End execution timer
+        t_end = time.time()
+        t_exec = t_end-t_start
+        print(f"Execution time: {t_exec} seconds.")
 
         return df, self.corrected_words
     
