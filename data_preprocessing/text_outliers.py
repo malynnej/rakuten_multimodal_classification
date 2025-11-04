@@ -20,6 +20,10 @@ from string import punctuation
 # Execution time
 import time
 
+# Display progress bars
+from tqdm import tqdm
+tqdm.pandas()
+
 class TransformTextOutliers:
     """
     This class can be used to identify and analyse outliers in text within a data frame. These outliers can then be transformed to meet the necessary requirements. 
@@ -49,9 +53,11 @@ class TransformTextOutliers:
 
     """
 
-    def __init__(self, model="en_core_web_en", sentence_normalization=True, similarity_threshold=0.8, factor=3, report_path="./TextOutlierReport.txt"):
+    def __init__(self, column_to_transform="text", model="en_core_web_en", word_count_threshold=250, sentence_normalization=True, similarity_threshold=0.8, factor=3, report_path="./TextOutlierReport.txt"):
+        self.column_to_transform = column_to_transform
         self.model = model
         self.nlp = spacy.load(self.model)
+        self.word_count_threshold = word_count_threshold
         self.sentence_normalization = sentence_normalization
         self.similarity_threshold = similarity_threshold
         self.factor = factor
@@ -65,6 +71,7 @@ class TransformTextOutliers:
             print("Sentence normalization is activated.")
         print("Similarity threshold is: ", self.similarity_threshold)
         print(f"Threshold of word counts is {self.factor} * standard deviation")
+        print("Defined word count threshold: ", self.word_count_threshold)
         print("\n")
         print("#" * 50)
 
@@ -141,7 +148,7 @@ class TransformTextOutliers:
         df = dataframe.copy()
 
         # Calculate test statistics
-        stats, word_counts, sentence_counts = self.text_stats_calc(df["text"])
+        stats, word_counts, sentence_counts = self.text_stats_calc(df[self.column_to_transform])
 
         df["word_counts"] = word_counts
         df["sentence_counts"] = sentence_counts
@@ -149,6 +156,7 @@ class TransformTextOutliers:
         # Calcuate thresholds
         word_count_threshold = stats["word_count_mean"] + factor * stats["word_count_std"]
         print("Outlier threshold: ", stats["word_count_mean"], " + ", factor, " * ", stats["word_count_std"], " = ",  word_count_threshold)
+        print("Defined word count threshold: ", self.word_count_threshold)
 
         print("\nDescriptive statistics of word counts:")
         print(df["word_counts"].describe())
@@ -180,7 +188,7 @@ class TransformTextOutliers:
             plt.show()
 
         # Get data frame containing outliers according to threshold.
-        violated_obeservation = df["word_counts"] >= word_count_threshold
+        violated_obeservation = df["word_counts"] >= self.word_count_threshold
 
         return violated_obeservation, stats
         
@@ -350,7 +358,7 @@ class TransformTextOutliers:
         df = dataframe.copy()
 
         # define threshold for text length
-        print("\nInitial analysis:")
+        print("\n>>> Initial analysis:")
         violated_obeservation, stats_init = self.outlier_analysis(df, self.factor)
 
         self.log.append("#" * 50)
@@ -358,25 +366,25 @@ class TransformTextOutliers:
         self.log.append("#" * 50)
 
         # Remove redundant informations
-        print("\nCleaning sentences.")
-        df.loc[violated_obeservation, "text"] = df.loc[violated_obeservation, "text"].apply(lambda row: self.cosine_similarity_calc(row))
+        print("\n>>> Cleaning sentences.")
+        df.loc[violated_obeservation, self.column_to_transform] = df.loc[violated_obeservation, self.column_to_transform].progress_apply(lambda row: self.cosine_similarity_calc(row))
 
         self.log.append("#" * 50)
         self.log.append("\nText summary:\n")
         self.log.append("#" * 50)
 
         # Summarize texts
-        print("\nStarting text summarization.")
-        df.loc[violated_obeservation, "text"] = df.loc[violated_obeservation, "text"].apply(lambda row: self.summarizer(row))
+        print(">>> Starting text summarization.")
+        df.loc[violated_obeservation, self.column_to_transform] = df.loc[violated_obeservation, self.column_to_transform].progress_apply(lambda row: self.summarizer(row))
 
         # Calculate text statistics post transformation
-        print("\nPost analysis.")
-        stats_post, _, _ = self.text_stats_calc(df["text"])
+        print(">>> Post analysis.")
+        stats_post, _, _ = self.text_stats_calc(df[self.column_to_transform])
 
         transformed_dataframe = df
 
         # Report
-        print("\nWrite report file to path: ", self.report_path)
+        print("\n>>> Write report file to path: ", self.report_path)
         with open(self.report_path, "w", encoding='utf-8') as file:
             for string in self.log:
                 file.write(string + '\n')
@@ -386,9 +394,7 @@ class TransformTextOutliers:
         t_exec = t_end-t_start
 
         print("\nOutlier transformation fnished successfully!.\n")
-        print(f"Execution time: {t_exec}")
-        print("#" * 50)
-
+        print(f"Execution time: {t_exec} seconds.")
 
         return transformed_dataframe, stats_init, stats_post
     

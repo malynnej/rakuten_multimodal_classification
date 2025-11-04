@@ -11,11 +11,14 @@ Supports 4 methods:
 Change method in params.yaml
 """
 
+# Execution time
+import time
+
 class ClassBalancing:
     def __init__(self, method='none'):
         self.method = method
         print("#" * 50)
-        print(f"Class Balancing initialized: method = '{self.method}'")
+        print(f"\nClass Balancing initialized: method = '{self.method}'\n")
         print("#" * 50 + "\n")
     
     def process(self, dataframe):
@@ -32,6 +35,9 @@ class ClassBalancing:
         dataframe : pd.DataFrame
             Balanced dataframe (or unchanged if method='none')
         """
+
+        # Start execution timer
+        t_start = time.time()
         
         if self.method == 'none':
             print("Class balancing: DISABLED (method='none')\n")
@@ -72,5 +78,10 @@ class ClassBalancing:
         df_resampled['prdtypecode'] = y_resampled
         
         print(f"✓ Class balancing complete: {self.method}\n")
+
+        # End execution timer
+        t_end = time.time()
+        t_exec = t_end-t_start
+        print(f"Execution time: {t_exec} seconds.")
         
         return df_resampled

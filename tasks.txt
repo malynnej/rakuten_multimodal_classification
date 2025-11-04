@@ -1,3 +1,24 @@
+Updated tasks (31.10.2025):
+
+1. Finish report @all
+
+2. Data Preprocessing
+    - Finish Translation @Rohan
+    - Finish and test pipeline @Michael
+    - Cleaning repository @Michael
+
+3. Modeling
+    - Vanilla CNN image classification @Jenny, @Michael
+    - Research transfer learning text / image classification @all
+    - Vanilla text classification @Jo, @Rohan, @Michael
+ 
+ 4. Cloud computing
+    - Colab / Codespaces @Jenny
+    - AWS @Michael
+    - Optional: Create AWS Accounts
+
+###########################################################################################
+
 Data Preprocessing:
 
 Text:

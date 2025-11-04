@@ -2,11 +2,12 @@ Paths:
   data_raw_dir: "./data/raw/"
   image_raw_dir: "./data/raw/images/"
   image_train_path: "./data/raw/images/image_train/"
-  #add JLA
-  image_train_path_output: "./data/raw/images/image_train_preprocessed/"
-  image_train_path_greyscale: "./data/raw/images/image_train_greyscale/"
-  #end add JLA
+  image_train_path_output: "./data/preprocessed/images/image_train_preprocessed/"
+  image_train_path_greyscale: "./data/preprocessed/images/image_train_greyscale/"
+  image_test_path_output: "./data/preprocessed/images/image_test_preprocessed/"
+  image_test_path_greyscale: "./data/preprocessed/images/image_test_greyscale/"
   X_train: "./data/raw/X_train.csv"
   y_train: "./data/raw/y_train.csv"
   TextOutlierReport: "./TextOutlierReport.txt"
   ImageDataFrameSavePath: "./data/tmp/"
+  TextDataFrameSavePath: "./data/preprocessed/"
