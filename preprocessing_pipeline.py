@@ -67,7 +67,9 @@ def preprocessing_pipeline(df, paths, params, mode):
     # Instantiate the translation class
     if params.ExecFlags.LLMTransformationFlag:
         ttr = LLMTransformation(TranslatorKind=params.transPara.TranslatorKind, 
-                            llm_model=params.transPara.llm_model)
+                            llm_model=params.transPara.llm_model,
+                            batch_mode = params.transPara.batch_mode
+                            )
 
         # Short DataFrame for testing, taking long computation time
         # for big dataframe. Batch needs to be implemented. 

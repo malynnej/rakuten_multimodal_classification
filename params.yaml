@@ -9,6 +9,7 @@ DecodeEncode:
 transPara:
   TranslatorKind : 'Google'
   llm_model : "llama3.2:3b"
+  batch_mode : "True"
 
 TextOutlier:
   llm: "en_core_web_sm"
