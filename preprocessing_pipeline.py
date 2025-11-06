@@ -67,7 +67,10 @@ def preprocessing_pipeline(df, paths, params, mode):
     # Instantiate the translation class
     if params.ExecFlags.LLMTransformationFlag:
         ttr = LLMTransformation(TranslatorKind=params.transPara.TranslatorKind, 
-                            llm_model=params.transPara.llm_model)
+                            llm_model=params.transPara.llm_model,
+                            batch_mode = params.transPara.batch_mode,
+                            chunk_size= params.transPara.chunk_size
+                            )
 
         # Short DataFrame for testing, taking long computation time
         # for big dataframe. Batch needs to be implemented. 
@@ -77,6 +80,7 @@ def preprocessing_pipeline(df, paths, params, mode):
     if params.ExecFlags.ClassBalancingFlag and mode=="train":
         cb = ClassBalancing(method=params.ClassBalancing.method)
         df = cb.process(df)
+
 
     init.save_files(df, paths, mode, X_columns=["text"])
 
