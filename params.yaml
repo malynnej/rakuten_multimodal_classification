@@ -7,9 +7,10 @@ DecodeEncode:
   words_encoding : True
 
 transPara:
-  TranslatorKind : 'Google'
-  llm_model : "llama3.2:3b"
-  batch_mode : "True"
+  TranslatorKind: 'Google'
+  llm_model: "llama3.2:3b"
+  batch_mode: True
+  chunk_size: 250
 
 TextOutlier:
   llm: "en_core_web_sm"
@@ -49,8 +50,6 @@ ExecFlags:
   TextCleaningFlag: True
   TransformTextOutliersFlag: True
   LLMTransformationFlag: True
-  ClassBalancingFlag: True
-  ImageCleaningFlag: True
-  ImagePreprocessorFlag: True
-
-
+  ClassBalancingFlag: False
+  ImageCleaningFlag: False
+  ImagePreprocessorFlag: False
