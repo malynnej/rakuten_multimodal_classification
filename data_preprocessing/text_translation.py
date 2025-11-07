@@ -116,7 +116,7 @@ class LLMTransformation:
         chunk_df["nWords"] = chunk_df[columns].apply(lambda x: len(str(x).split()))
 
         groups = [
-            {"name": "short", "mask": chunk_df["nWords"] < 200, "batch_size": 10},
+            {"name": "short", "mask": chunk_df["nWords"] < 200, "batch_size": 5},
             {"name": "medium", "mask": (chunk_df["nWords"] >= 200) & (chunk_df["nWords"] < 500), "batch_size": 3},
             {"name": "long", "mask": (chunk_df["nWords"] >= 500) & (chunk_df["nWords"] < 2000), "batch_size": 2},
             {"name": "very_long", "mask": chunk_df["nWords"] >= 2000, "batch_size": 1},
@@ -207,7 +207,7 @@ class LLMTransformation:
             groups = self.define_batches(chunk_df,col)
             out_col = f"{col}_LLM"
             # Step 3: Loop over groups
-            for g in groups:
+            for g in tqdm(groups, total=len(groups), unit="group", desc="Translating groups"):
                 sub_df = chunk_df.loc[g["mask"]]
                 if sub_df.empty:
                     continue
@@ -260,22 +260,37 @@ class LLMTransformation:
     ################ Google Translate  #################
     ####################################################     
     
-    def _google_request(self, inText):
-        if pd.isnull(inText) or str(inText).strip() == "":
-            return inText
+    def _google_request(self, inText, batch=False):
+
+        #if pd.isnull(inText) or str(inText).strip() == "":
+        #    return inText
         
         self.counter += 1
 
-        if self.counter % 10000 == 0:
+        if self.counter % 2000 == 0:
+            time.sleep(2)
             print(" Refreshing GoogleTranslateor instance after 10000 calls..")
             self.translator = GoogleTranslator(source='auto', target='en')
 
-        try:
-            return self.translator.translate(inText)
-        except Exception as e:
-            self.untranslated_errors.append(str(e))
-            self.error_count += 1
-            return inText            
+        if batch:
+            batch_text = ";\n".join([f"{i+1}. {t}" for i, t in enumerate(inText)])
+            try:
+                response = self.translator.translate(batch_text)
+                pattern = re.compile(r'(\d+)\.+\s(.*?)(?=\n\d+\.+|\Z)', re.S | re.M)
+                matches = pattern.findall(response)
+                matches_dict = {key: value for key, value in matches}
+                return matches_dict
+            except Exception as e:
+                self.untranslated_errors.append(str(e))
+                self.error_count += 1
+                return {str(i+1): t for i, t in enumerate(inText)}  
+        else:
+            try:
+                return self.translator.translate(inText)
+            except Exception as e:
+                self.untranslated_errors.append(str(e))
+                self.error_count += 1
+                return inText            
     
     def translateByGoogle(self, chunk_df, columns):
 
@@ -327,12 +342,13 @@ class LLMTransformation:
                 # Step 4: Batch Processing
                 
                 for batch_number, idx in enumerate(batch_indices):
-                    #print(f"The batch number, {batch_number+1}, is being translated")
-                    #print("The batchsize:",len(batch_df))
-                    chunk_df.loc[idx, out_col] = sub_df.loc[idx, col].apply(self._google_request)
+                    batch_df =  sub_df.loc[idx]
+                    batch_texts = batch_df[col].astype(str).tolist()
+                    time.sleep(5)
+                    translated = self._google_request(batch_texts,batch=True)
+                    chunk_df.loc[idx, out_col] = [translated.get(str(i+1), None) for i in range(len(batch_texts))]
 
-
-  # Save errors once at end
+        # Save errors once at end
         if self.untranslated_errors:
             with open("untranslated.txt", "a", encoding="utf-8") as f:
                 f.write("\n".join(self.untranslated_errors))
