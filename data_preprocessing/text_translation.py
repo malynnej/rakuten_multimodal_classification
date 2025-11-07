@@ -74,9 +74,9 @@ class LLMTransformation:
         print(f"...Starting translation for {len(df)} rows with chunk size={self.chunk_size}...")
 
         # Split into chunks for large DataFrames
-        print('-'*50)
+
         chunks = np.array_split(df, max(1, len(df)//self.chunk_size))
-        print('-'*50)
+
 
         for i, chunk_df in enumerate(chunks, start=1):
             print('-'*50)
@@ -135,17 +135,21 @@ class LLMTransformation:
     def ollamaBatchTransformation(self, inText, prompt, batch=False):
         """Handles both single and batch mode LLM calls."""
         if batch:
-            batch_text = ";\n".join([f"{i+1}.. {t}" for i, t in enumerate(inText)])
+            batch_text = ";\n".join([f"{i+1}. {t}" for i, t in enumerate(inText)])
             full_prompt = (
                 f"{prompt}\n"
                 f"Here are the texts:\n{batch_text}\n")
             response = ollama.chat(model=self.model, messages=[{"role": "user", "content": full_prompt}])
             content = response["message"]["content"].strip()
+            #print(content)
             # Comment - Uncomment following code lines and check the outcome
-            matches = re.findall(r'(\d+)\.+\s(.*?)(?=\n\d+\.+|\Z)', content, flags=re.S)
+            #matches = re.findall(r'(\d+)\.+\s(.*?)(?=\n\d+\.+|\Z)', content, flags=re.S)
             #matches = re.findall(r'(\d+)[\.\)\-]+[\s]*(.*?)(?=\n\d+[\.\)\-]+|\Z)', content, flags=re.S)
+            pattern = re.compile(r'^(\d+)[\.\)\-]\s*(.+?)(?=^\d+[\.\)\-]|\Z)', re.S | re.M)
+            matches = pattern.findall(content)
             #matches_dict = {str(key): value.strip() for key, value in matches}
             matches_dict = {key: value for key, value in matches}
+            #print(list(matches_dict.values()))
 
             # if dictionary is single text then
             if not matches_dict and len(inText) == 1:
@@ -171,12 +175,13 @@ class LLMTransformation:
         prompt = """For each line:
         - Translate to English, Keep the input text line numbering 1-N unchaged.
         - Max 200 words for each line.
-        - Do not translate text in english, just summarized.
+        - Do not translate text in english, just summarized and clean.
         - Only factual attributes (product type, features, notable characteristics)
-        - No marketing fluff, no repetition. 
+        - No marketing fluff, no repetition.
         - Do not output labels, headings, bullet points, or extra commentary.
         """
-        chunk_df = chunk_df.copy()
+        chunk_df = chunk_df.copy(deep=False)
+        incomplete_transformation = []
 
         # --------- Non-batch mode --------------
 
@@ -200,21 +205,22 @@ class LLMTransformation:
                 continue
 
             groups = self.define_batches(chunk_df,col)
-            new_col = f"{col}_LLM"
-            chunk_df[col] = chunk_df[col].fillna('Empty').replace('', 'Empty')
+            out_col = f"{col}_LLM"
             # Step 3: Loop over groups
             for g in groups:
-                sub_df = chunk_df[g["mask"]].copy()
+                sub_df = chunk_df.loc[g["mask"]]
                 if sub_df.empty:
                     continue
 
                 batch_size = g["batch_size"]
                 n_batches = (len(sub_df) + batch_size - 1) // batch_size
+                batch_indices = np.array_split(sub_df.index, np.ceil(len(sub_df)/batch_size))
                 print(f"\nProcessing group '{g['name']}' ({len(sub_df)} rows) with batch size {batch_size} ({n_batches} batches)")
 
                 # Step 4: Batch processing
-                for batch_number, batch_df in tqdm(sub_df.groupby(np.arange(len(sub_df)) // batch_size)):
+                for batch_number, idx in enumerate(batch_indices):
                     try:
+                        batch_df =  sub_df.loc[idx]
                         #print(f"The batch number, {batch_number+1}, is being translated")
                         batch_texts = batch_df[col].astype(str).tolist()
                         #time.sleep(1)
@@ -226,7 +232,6 @@ class LLMTransformation:
                         while len(translated) < len(batch_df) and retry_count < max_retries:
                             retry_count += 1
                             print(f"⚠️ Batch {batch_number} : Translation incomplete")
-                            print(f"{len(translated)}/{len(batch_df)}). Retrying {retry_count}/{max_retries}...")
                             #time.sleep(2)
                             translated, _ = self.ollamaBatchTransformation(batch_texts, prompt, batch=True)
 
@@ -235,16 +240,18 @@ class LLMTransformation:
 
                         if len(translated) < len(batch_df):
                             print(f" ❌ Batch {batch_number}: Translation still incomplete after {max_retries} retries. ")
+                            incomplete_transformation.append(list(idx))
 
-                        sub_df.loc[batch_df.index, new_col] = [
-                            translated.get(str(i+1), None) for i in range(len(batch_df))
-                        ]
+                        # Map translations back to DataFrame
+
+                        chunk_df.loc[idx, out_col] = [translated.get(str(i+1), None) for i in range(len(batch_texts))]
 
                     except Exception as e:
                         print(f"Error in batch {batch_number}: {e}")
+                        incomplete_transformation.append(list(idx))
 
-                chunk_df.loc[sub_df.index, new_col] = sub_df[new_col]
-                #all_translated_parts.append(sub_df)
+        if incomplete_transformation:
+            print(f"\nTotal incomplete batches: {len(incomplete_transformation)}")
 
         return chunk_df #pd.concat(all_translated_parts).sort_index()
 
@@ -256,18 +263,28 @@ class LLMTransformation:
     def _google_request(self, inText):
         if pd.isnull(inText) or str(inText).strip() == "":
             return inText
+        
+        self.counter += 1
+
+        if self.counter % 10000 == 0:
+            print(" Refreshing GoogleTranslateor instance after 10000 calls..")
+            self.translator = GoogleTranslator(source='auto', target='en')
+
         try:
-            return GoogleTranslator(source='auto', target='en').translate(inText)
+            return self.translator.translate(inText)
         except Exception as e:
-            with open("untranslated.txt", "a", encoding="utf-8") as f:
-                f.write(f"{e}\n")
+            self.untranslated_errors.append(str(e))
             self.error_count += 1
             return inText            
     
     def translateByGoogle(self, chunk_df, columns):
 
-        chunk_df = chunk_df.copy()
         self.error_count = 0
+        self.translator = GoogleTranslator(source='auto', target='en')
+        self.counter = 0
+        self.untranslated_errors = []
+
+        chunk_df = chunk_df.copy(deep=False)
 
         # --------- Non-batch mode --------------
 
@@ -278,13 +295,16 @@ class LLMTransformation:
                     continue
                 out_col = f"{col}_GGL"
                 chunk_df[out_col] = chunk_df[col].progress_apply(self._google_request)
+
+            # Save untranslated errors once at end
+            if self.untranslated_errors:
+                with open("untranslated.txt", "a", encoding="utf-8") as f:
+                    f.write("\n".join(self.untranslated_errors))
+            
             print(f"\n Total sentence more than 5000 character, {self.error_count}")
             return chunk_df
 
         # --------- Batch Model ----------------                    
-
-        
-        all_translated_parts = []  # to store translated DataFrames
 
         for col in columns:
             if col not in chunk_df.columns:
@@ -292,31 +312,30 @@ class LLMTransformation:
                 continue
 
             groups = self.define_batches(chunk_df, col)
-            new_col = f"{col}_GGL"
+            out_col = f"{col}_GGL"
     
             # Step 3: Loop over groups
-            for g in groups:
-                sub_df = chunk_df[g["mask"]].copy()
+            for g in tqdm(groups, total=len(groups), unit="group", desc="Translating groups"):
+                sub_df = chunk_df.loc[g["mask"]]
                 if sub_df.empty:
                     continue
 
                 batch_size = g["batch_size"]
-                n_batches = (len(sub_df)+batch_size-1)//batch_size
-                print(f"\nProcessing group '{g['name']}' ({len(sub_df)} rows) with batch size {batch_size} ({n_batches} batches)")
+                batch_indices = np.array_split(sub_df.index, np.ceil(len(sub_df)/batch_size))
+                print(f"\nProcessing group '{g['name']}' ({len(sub_df)} rows) with batch size {batch_size}")
                 
                 # Step 4: Batch Processing
                 
-                for batch_number, batch_df in tqdm(sub_df.groupby(np.arange(len(sub_df))//batch_size)):
+                for batch_number, idx in enumerate(batch_indices):
                     #print(f"The batch number, {batch_number+1}, is being translated")
                     #print("The batchsize:",len(batch_df))
-                    batch_df[new_col] = batch_df[col].apply(self._google_request)
-                    sub_df.loc[batch_df.index, new_col] = batch_df[new_col]
+                    chunk_df.loc[idx, out_col] = sub_df.loc[idx, col].apply(self._google_request)
 
 
-                all_translated_parts.append(sub_df)
-        print(f"\n Total sentence more than 5000 character, {self.error_count}")
+  # Save errors once at end
+        if self.untranslated_errors:
+            with open("untranslated.txt", "a", encoding="utf-8") as f:
+                f.write("\n".join(self.untranslated_errors))
 
-        # step 5 : Merge all parts back into one frame 
-        chunk_df = pd.concat(all_translated_parts).sort_index()
-
+        print(f"\nTotal untranslated entries: {self.error_count}")
         return chunk_df
