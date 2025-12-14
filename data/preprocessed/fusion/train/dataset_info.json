@@ -1,0 +1,66 @@
+{
+  "builder_name": "csv",
+  "citation": "",
+  "config_name": "default",
+  "dataset_name": "csv",
+  "dataset_size": 39371798,
+  "description": "",
+  "download_checksums": {
+    "C:/Projects/VS_Code/ML_Projects/Rakuten-Ecommerce-Proj/./modeling/fusion/train_fusion.csv": {
+      "num_bytes": 24513440,
+      "checksum": null
+    },
+    "C:/Projects/VS_Code/ML_Projects/Rakuten-Ecommerce-Proj/./modeling/fusion/val_fusion.csv": {
+      "num_bytes": 6129252,
+      "checksum": null
+    },
+    "C:/Projects/VS_Code/ML_Projects/Rakuten-Ecommerce-Proj/./modeling/fusion/test_fusion.csv": {
+      "num_bytes": 7891795,
+      "checksum": null
+    }
+  },
+  "download_size": 38534487,
+  "features": {
+    "text": {
+      "dtype": "string",
+      "_type": "Value"
+    },
+    "label": {
+      "dtype": "int64",
+      "_type": "Value"
+    },
+    "image": {
+      "dtype": "string",
+      "_type": "Value"
+    }
+  },
+  "homepage": "",
+  "license": "",
+  "size_in_bytes": 77906285,
+  "splits": {
+    "train": {
+      "name": "train",
+      "num_bytes": 25045958,
+      "num_examples": 51529,
+      "dataset_name": "csv"
+    },
+    "val": {
+      "name": "val",
+      "num_bytes": 6263078,
+      "num_examples": 12953,
+      "dataset_name": "csv"
+    },
+    "test": {
+      "name": "test",
+      "num_bytes": 8062762,
+      "num_examples": 16554,
+      "dataset_name": "csv"
+    }
+  },
+  "version": {
+    "version_str": "0.0.0",
+    "major": 0,
+    "minor": 0,
+    "patch": 0
+  }
+}
