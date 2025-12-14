@@ -5,3 +5,4 @@ data/raw/
 data/tmp/
 data/preprocessed/images/
 data_preprocessing/__pycache__/
+.venv/
