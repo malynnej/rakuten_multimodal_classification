@@ -101,8 +101,8 @@ sns.set_palette("husl")
 @st.cache_data
 def load_data():
     try:
-        X_train = pd.read_csv('../data/raw/text/X_train.csv')
-        Y_train = pd.read_csv('../data/raw/text/Y_train.csv')
+        X_train = pd.read_csv('./../data/raw/X_train.csv')
+        Y_train = pd.read_csv('./../data/raw/y_train.csv')
         df = pd.merge(X_train, Y_train, left_index=True, right_index=True)
         return df
     except Exception as e:

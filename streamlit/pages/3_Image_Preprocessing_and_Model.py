@@ -218,7 +218,7 @@ Below are examples of preprocessed images from our dataset, organized by backgro
 All images have been cropped and standardized to 500×500 pixels.
 """)
 
-preprocessed_dir = Path('../data/preprocessed/images')
+preprocessed_dir = Path('./../data/preprocessed/Example_Preprocessed_Images')
 
 if preprocessed_dir.exists():
     

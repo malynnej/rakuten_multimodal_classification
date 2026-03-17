@@ -499,7 +499,7 @@ st.write("---")
 st.subheader("📉 Train and Validation Loss")
 
 try:
-    slide14_img = Image.open('images./ppt_images/slide_14_image_5.png')
+    slide14_img = Image.open('./images/ppt_images/slide_14_image_5.png')
     st.image(slide14_img, use_container_width=True)
 except:
     st.info("💡 Place image .png in ./ppt_images/ folder")
@@ -513,7 +513,7 @@ st.write("---")
 st.subheader("🎯 Accuracy")
 
 try:
-    slide15_img = Image.open('images./ppt_images/slide_15_image_5.png')
+    slide15_img = Image.open('./images/ppt_images/slide_15_image_5.png')
     st.image(slide15_img, use_container_width=True)
 except:
     st.info("💡 Place image .png in ./ppt_images/ folder")

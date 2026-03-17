@@ -89,9 +89,9 @@ class LateFusionModel(nn.Module):
 @st.cache_resource
 def load_model():
     """Load fusion model (cached)"""
-    bert_path = "../data/models/bert-model"
-    effnet_path = "../data/models/effnet-model/best_model_final.pth"
-    fusion_path = "../data/models/fusion-model/fusion_best_V2.pth"
+    bert_path = "./../data_model/bert-model"
+    effnet_path = "./../data_model/effnet-model/best_model_final.pth"
+    fusion_path = "./../data_model/fusion-model/fusion_best_V2.pth"
     
     model = LateFusionModel(bert_path=bert_path, effnet_path=effnet_path, num_classes=27)
     model.load_state_dict(torch.load(fusion_path, map_location="cpu"))
@@ -101,19 +101,19 @@ def load_model():
 @st.cache_resource
 def load_tokenizer():
     """Load BERT tokenizer (cached)"""
-    bert_path = "../data/models/bert-model"
+    bert_path = "./../data_model/bert-model"
     return BertTokenizer.from_pretrained(bert_path)
 
 @st.cache_data
 def load_label_mappings():
-    with open("../data/models/label2id", "r") as f:
+    with open("./../inference/label2id", "r") as f:
         label2id = json.load(f)
     id2label = {v: k for k, v in label2id.items()}
     return label2id, id2label
 
 @st.cache_data
 def load_fusion_data():
-    return pd.read_csv("../data/preprocessed/train_fusion.csv")
+    return pd.read_csv("./../data/train_fusion.csv")
 
 def get_random_samples(df, n=3):
     return df.sample(n=n).reset_index(drop=True)

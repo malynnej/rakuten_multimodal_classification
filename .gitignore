@@ -6,3 +6,6 @@ data/tmp/
 data/preprocessed/images/
 data_preprocessing/__pycache__/
 .venv/
+data_model/bert-model/model.safetensors
+data_model/effnet-model/best_model_final.pth
+data_model/fusion-model/fusion_best_V2.pth
