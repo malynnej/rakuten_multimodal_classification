@@ -18,7 +18,7 @@ Methodology
 
 We followed following methodology to examine the data, testing different models and set the final fusion model to enable product class prediction based on image and text:
 
-Raw Data Input (Text + Image) -> Data Exploration -> Data Preprocessing -> Unimodal Models -> Multimodal Fusion Modal -> Product Class
+![Methodology](./streamlit/images/methodology.png)
 
 ### Data Exploration
 
@@ -58,6 +58,8 @@ Due to the better performing transfer learning models, we kept those for the fin
 ### Multimodal Fusion Model
 
 Here we combined both selected unimodal text and image model encoders to a multimodal late fusion architecture.
+
+![Multimodal Architecture](./streamlit/images/multimodal_image.png)
 
 Results
 --------------------
