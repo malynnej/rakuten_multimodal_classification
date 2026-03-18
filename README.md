@@ -1,4 +1,4 @@
-Rakuten Challenge MLOps
+Rakuten Multimodal Classification
 =======================
 
 Project Context And Objective
